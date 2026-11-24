@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QA Genie</title>
+  <link rel="stylesheet" href="/style.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <aside class="pane" id="sidebar">
+    <header class="bar">
+      <h1><button id="about-button" class="title" title="About QA Genie">QA Genie</button></h1>
+      <span class="spacer"></span>
+      <button id="vars-button" class="icon" popovertarget="vars-popover" title="Variables">
+        <svg viewBox="0 0 24 24"><path d="M20 7h-9M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
+      </button>
+      <button id="settings-button" class="icon" title="Settings">
+        <svg viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+      <button id="sidebar-toggle" class="icon" title="Collapse sidebar">
+        <svg viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg>
+      </button>
+    </header>
+    <div class="bar sub">
+      <span>Tasks</span>
+      <button id="new-task" title="Create a task in tasks/">+ New</button>
+    </div>
+    <ul id="task-list" class="list"></ul>
+  </aside>
+
+  <div id="vars-popover" class="popover" popover>
+    <div class="bar sub">
+      <span>Variables</span>
+      <span class="bar-actions">
+        <button id="delete-vars" class="icon" title="Delete variables"><svg viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg></button>
+        <button id="done-vars" hidden>Done</button>
+        <button id="new-var" title="Add a variable to qa-genie.config.json">+ New</button>
+      </span>
+    </div>
+    <ul id="var-list" class="list vars"></ul>
+  </div>
+
+  <main class="pane" id="editor-pane">
+    <div class="bar">
+      <button id="insert-var" popovertarget="insert-var-popover" hidden title="Insert a variable where the cursor is">+ Variable</button>
+      <span id="dirty" class="tag" hidden>Unsaved</span>
+      <span class="spacer"></span>
+      <button id="delete" class="icon bin" hidden title="Delete this task"><svg viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg></button>
+      <button id="save" disabled hidden title="Ctrl+S">Save</button>
+      <button id="edit" class="icon" title="Edit" aria-pressed="false" disabled>
+        <svg viewBox="0 0 24 24"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
+      </button>
+      <button id="run" class="primary" disabled>Run</button>
+      <button id="stop" class="danger" hidden>Stop</button>
+    </div>
+    <div id="editor-wrap">
+      <div id="editor" class="blank" role="textbox" aria-multiline="true" aria-label="Task" spellcheck="false" contenteditable="false" data-placeholder="Select a task on the left, or create a new one."></div>
+    </div>
+  </main>
+
+  <div id="insert-var-popover" class="popover" popover>
+    <div class="bar sub"><span>Insert variable</span></div>
+    <input id="insert-var-filter" type="search" placeholder="Find a variable" aria-label="Find a variable" spellcheck="false" autocomplete="off">
+    <ul id="insert-var-list" class="list vars" role="listbox" aria-label="Variables"></ul>
+  </div>
+
+  <section class="pane" id="run-pane">
+    <button id="history-button" class="icon" popovertarget="history-popover" title="Run history">
+      <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+    </button>
+    <div id="run-view" class="empty">No run selected.</div>
+  </section>
+
+  <div id="history-popover" class="popover" popover>
+    <div class="bar sub">
+      <span>Run history</span>
+      <span class="bar-actions">
+        <button id="delete-runs" class="icon" title="Delete runs"><svg viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg></button>
+        <button id="done-runs" hidden>Done</button>
+      </span>
+    </div>
+    <ul id="run-list" class="list"></ul>
+  </div>
+
+  <dialog id="settings">
+    <form id="settings-form">
+      <h2>Settings</h2>
+      <div id="model-fields">
+        <label class="field">Endpoint<input name="endpoint" type="url" required spellcheck="false" placeholder="https://<resource>.openai.azure.com/openai/v1/"></label>
+        <label class="field">Model deployment<input name="model" required spellcheck="false"></label>
+      </div>
+      <div class="field"><span class="field-label"><label for="api-key">Azure AI Foundry API key</label><span class="info"><button type="button" class="icon" aria-label="How to get an API key" aria-describedby="api-key-tip"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></button><span id="api-key-tip" class="tip" role="tooltip">Go to portal.azure.com, open Foundry and create your own API key.</span></span></span><input id="api-key" name="apiKey" type="password" autocomplete="off" spellcheck="false"></div>
+      <fieldset id="secret-fields">
+        <legend>Your sign-in email</legend>
+        <p class="intro">To have your email typed in a task, edit the task, click <strong>+ Variable</strong> where the email should go and pick <strong>LOGIN_EMAIL</strong>, for example: <em>"On the sign-in page, enter <span class="chip env">LOGIN_EMAIL</span> and click Next."</em></p>
+        <p class="intro">The AI model only ever sees the name LOGIN_EMAIL, never your email.</p>
+        <div id="secret-list"></div>
+      </fieldset>
+      <p id="settings-error" class="error-text" role="alert" hidden></p>
+      <div class="actions">
+        <button type="button" id="settings-cancel">Cancel</button>
+        <button type="submit" id="settings-save" class="primary">Save</button>
+      </div>
+    </form>
+  </dialog>
+  <dialog id="about" aria-labelledby="about-title">
+    <h2 id="about-title">QA Genie</h2>
+    <p>Describe a web browser task in plain text, and an AI model carries it out in a real browser, returning a pass or fail verdict with a screenshot of every step.</p>
+    <p><strong>How to use</strong></p>
+    <ol>
+      <li>Pick a task on the left or click <strong>+ New</strong>, then write the steps and what you expect to see. Shared values go in <strong>Variables</strong>, secrets in <strong>Settings</strong>.</li>
+      <li>Click <strong>Run</strong> and watch the browser work through each step. Several tasks can run at once.</li>
+      <li>Read the verdict and check the screenshots. Past runs are under <strong>Run history</strong>.</li>
+    </ol>
+    <div class="actions">
+      <button type="button" id="about-close" class="primary" autofocus>Close</button>
+    </div>
+  </dialog>
+  <dialog id="lightbox"><img alt=""><p class="caption"></p></dialog>
+  <div id="toast" role="status" hidden></div>
+</body>
+</html>

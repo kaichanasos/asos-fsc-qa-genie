@@ -1,0 +1,241 @@
+:root {
+  --bg: #ffffff;
+  --panel: #f6f7f9;
+  --border: #dfe2e7;
+  --text: #1d2330;
+  --muted: #667085;
+  --accent: #2563eb;
+  --hover: #eceff3;
+  --passed: #16a34a;
+  --failed: #dc2626;
+  --error: #d97706;
+  --running: #2563eb;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #15181e;
+    --panel: #1b1f27;
+    --border: #2c323d;
+    --text: #e4e7ec;
+    --muted: #98a2b3;
+    --accent: #60a5fa;
+    --hover: #252a34;
+    --passed: #4ade80;
+    --failed: #f87171;
+    --error: #fbbf24;
+    --running: #60a5fa;
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  height: 100vh;
+  display: grid;
+  --sidebar: 220px;
+  grid-template-columns: var(--sidebar) minmax(360px, 1fr) minmax(420px, 1.1fr);
+  font: 14px/1.45 system-ui, 'Segoe UI', sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+h1, h2 { margin: 0; font-size: 15px; font-weight: 600; }
+h1 { font-size: 16px; }
+code, pre, textarea { font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; }
+a { color: var(--accent); }
+[hidden] { display: none !important; }
+
+.pane { display: flex; flex-direction: column; min-height: 0; overflow: hidden; border-right: 1px solid var(--border); }
+#sidebar { background: var(--panel); }
+.bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-height: 48px; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+.bar.sub { min-height: 36px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); justify-content: space-between; }
+.spacer { flex: 1; }
+.tag { font-size: 11px; padding: 1px 6px; border-radius: 4px; background: var(--hover); color: var(--muted); }
+label { display: flex; align-items: center; gap: 4px; font-size: 13px; color: var(--muted); cursor: pointer; }
+
+button {
+  font: inherit; font-size: 13px; padding: 5px 12px; border-radius: 6px; cursor: pointer;
+  border: 1px solid var(--border); background: var(--bg); color: var(--text);
+}
+button:hover:not(:disabled) { background: var(--hover); }
+button:disabled { opacity: .5; cursor: default; }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button.primary:hover:not(:disabled) { filter: brightness(1.1); background: var(--accent); }
+button.danger { border-color: var(--failed); color: var(--failed); }
+.bar.sub button:not(.icon) { text-transform: none; letter-spacing: 0; padding: 2px 8px; font-size: 12px; }
+/* Same size as the header icons; the negative margin keeps the short bar from growing. */
+.bar.sub button.icon { margin: -4px 0; }
+button.icon { display: inline-flex; padding: 5px; border-color: transparent; background: none; color: var(--muted); }
+button.icon:hover:not(:disabled) { color: var(--text); }
+button.icon.active { color: var(--accent); background: var(--hover); }
+button.icon svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+/* The app title: looks like the heading, opens the About dialog. */
+h1 button.title { margin: -2px -6px; padding: 2px 6px; font: inherit; color: inherit; border-color: transparent; background: none; }
+h1 button.title:hover:not(:disabled) { color: inherit; background: none; }
+
+/* Collapsed sidebar: a narrow strip with just the icon buttons. */
+body.collapsed { --sidebar: 48px; }
+body.collapsed #sidebar > :not(header), body.collapsed #sidebar h1, body.collapsed #sidebar .spacer { display: none; }
+body.collapsed #sidebar header { flex-direction: column; padding: 8px 0; border-bottom: 0; }
+
+.list { list-style: none; margin: 0; padding: 4px; overflow-y: auto; }
+.list li { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; cursor: pointer; }
+.list li:hover { background: var(--hover); }
+.list li.active { background: var(--hover); font-weight: 600; }
+.list li.none { color: var(--muted); cursor: default; background: none; }
+.list li.dragging { opacity: .4; }
+.list .name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.list .meta { font-size: 12px; color: var(--muted); font-weight: normal; }
+#task-list { flex: 1; }
+.popover {
+  inset: auto; margin: 0; width: min(300px, calc(100vw - 16px)); max-height: 60vh; padding: 0; color: var(--text); background: var(--panel);
+  border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 8px 24px rgb(0 0 0 / .2);
+}
+.popover:popover-open { display: flex; flex-direction: column; }
+.popover .list { flex: 1; }
+
+.list.vars .var { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.list.vars .name { font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; }
+.list.vars .value { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.list.vars input {
+  width: 100%; margin-top: 2px; padding: 2px 6px; font: inherit; font-size: 12px; color: var(--text);
+  background: var(--bg); border: 1px solid var(--accent); border-radius: 4px; outline: none;
+}
+.list.vars li.new { cursor: default; background: none; }
+.list.vars input.name { margin: 0; font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; }
+/* The negative margin stops a row growing when its icon appears, e.g. the ✕ while deleting runs. */
+.list button.icon { flex: none; margin: -4px 0; }
+.list .remove, .list .remove:hover:not(:disabled) { color: var(--failed); }
+.list.deleting li { cursor: default; }
+.bar-actions { display: inline-flex; align-items: center; gap: 4px; }
+button.icon.bin:hover:not(:disabled) { color: var(--failed); }
+/* The selected task's name in the Tasks list, editable while editing the task. */
+.list input.task-name { flex: 1; min-width: 0; margin: -2px 0; padding: 1px 6px; font: inherit; font-weight: 600; color: var(--text); background: var(--bg); border: 1px solid var(--accent); border-radius: 4px; outline: none; }
+
+.dot { width: 9px; height: 9px; border-radius: 50%; flex: none; display: inline-block; }
+.dot.passed { background: var(--passed); }
+.dot.failed { background: var(--failed); }
+.dot.error { background: var(--error); }
+.spinner { width: 11px; height: 11px; flex: none; display: inline-block; border: 2px solid var(--running); border-right-color: transparent; border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Plain text with placeholders shown as chips; app.js keeps it plain (Enter, paste) and saves chips as their placeholders. */
+#editor-wrap { position: relative; flex: 1; min-height: 0; background: var(--bg); }
+#editor { position: absolute; inset: 0; margin: 0; padding: 14px 16px; overflow-y: auto; outline: none; font: 12.5px/1.6 ui-monospace, Consolas, monospace; tab-size: 2; white-space: pre-wrap; overflow-wrap: break-word; caret-color: var(--text); }
+#editor.blank::before { content: attr(data-placeholder); color: var(--muted); }
+#editor[contenteditable='false'] { cursor: default; }
+.list li.flash { animation: flash 1.6s ease-out; }
+@keyframes flash { from { background: color-mix(in srgb, var(--accent) 35%, transparent); } }
+/* Reads as a token, not as text: tinted pill in the UI font, so a variable name stands apart from the monospace steps around it. */
+#editor .chip, #settings .chip {
+  --chip: var(--accent);
+  padding: 1px 6px; border-radius: 4px; white-space: nowrap; cursor: default;
+  font: 600 12px/1 system-ui, 'Segoe UI', sans-serif; letter-spacing: .01em;
+  color: var(--chip); background: color-mix(in srgb, var(--chip) 12%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--chip) 30%, transparent);
+}
+/* Settings values are secret: same colour, dashed edge. */
+#editor .chip.env, #settings .chip.env { box-shadow: none; outline: 1px dashed color-mix(in srgb, var(--chip) 55%, transparent); outline-offset: -1px; }
+#editor .chip.unknown { --chip: var(--failed); text-decoration: wavy underline; text-underline-offset: 3px; }
+#editor-wrap.reading #editor .chip { cursor: pointer; }
+#editor-wrap.reading #editor .chip:hover { background: color-mix(in srgb, var(--chip) 22%, transparent); }
+
+#insert-var-filter {
+  margin: 8px 8px 0; padding: 5px 8px; font: inherit; font-size: 13px; color: var(--text);
+  background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+}
+#insert-var-filter:focus, #insert-var-list li:focus-visible { outline: 2px solid var(--accent); outline-offset: -1px; }
+#insert-var-list li.none button { margin-left: 4px; padding: 2px 8px; font-size: 12px; }
+/* The pinned Settings value, divided from the variables below it. */
+#insert-var-list li.env:has(+ li) { position: relative; margin-bottom: 9px; }
+#insert-var-list li.env:has(+ li)::after { content: ''; position: absolute; left: 8px; right: 8px; bottom: -5px; border-bottom: 1px solid var(--border); }
+
+#run-pane { position: relative; border-right: 0; }
+/* Placed like the icons in the sidebar bar: centred in its 47px content height (48px less the border), 12px from the edge, 8px apart. */
+#history-button { position: absolute; top: 9.5px; right: 12px; z-index: 2; }
+/* Only the steps scroll, so a scrollbar never narrows the header and shifts its toggle away from the Run history button. */
+#run-view { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+#run-view .steps { flex: 1; min-height: 0; overflow-y: auto; }
+#run-view.empty { display: grid; place-items: center; color: var(--muted); }
+
+.run-header { position: sticky; top: 0; z-index: 1; padding: 0 84px 12px 16px; background: var(--panel); border-bottom: 1px solid var(--border); }
+/* As tall as a bar's content, so the badge shares a centre line with the icons, like the title in the sidebar bar. */
+.run-title { display: flex; align-items: center; gap: 10px; min-height: 47px; font-size: 15px; }
+/* Sits next to the Run history button, which is positioned the same way in #run-pane. Points up while open, down while collapsed. */
+.run-title .toggle { position: absolute; top: 9.5px; right: 48px; }
+.run-title .toggle svg { transform: rotate(180deg); transition: transform 0.15s; }
+.run-header.collapsed .toggle svg { transform: none; }
+.run-header.collapsed .run-details { display: none; }
+.run-header .meta { margin-top: -4px; font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+.run-details .meta { margin-top: 8px; }
+.summary { margin: 8px 0 0; }
+.remembered { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; margin: 8px 0 0; font-size: 13px; }
+.remembered dt { color: var(--muted); }
+.remembered dd { margin: 0; font-family: ui-monospace, Consolas, monospace; overflow-wrap: anywhere; }
+.badge { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 10px; color: #fff; }
+.badge.passed { background: var(--passed); }
+.badge.failed { background: var(--failed); }
+.badge.error { background: var(--error); }
+.badge.running { background: var(--running); }
+@media (prefers-color-scheme: dark) { .badge { color: #111; } }
+
+.steps { list-style: none; margin: 0; padding: 8px 16px 24px; }
+.steps li { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.steps .num { flex: none; width: 28px; text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+.steps .body { flex: 1; min-width: 0; overflow-wrap: anywhere; } /* long URLs would otherwise make the list scroll sideways */
+.steps .error-text { margin: 6px 0 0; padding: 6px 8px; white-space: pre-wrap; border-radius: 4px; color: var(--failed); background: var(--hover); }
+.steps li.error .num { color: var(--failed); }
+.steps li.verdict { font-weight: 600; }
+.steps li.verdict.passed { color: var(--passed); }
+.steps li.verdict.failed { color: var(--failed); }
+.steps li.message { color: var(--muted); font-style: italic; }
+.steps li.message p { margin: 0; white-space: pre-wrap; }
+.thumb { flex: none; width: 150px; height: 94px; object-fit: cover; object-position: top; border: 1px solid var(--border); border-radius: 4px; cursor: zoom-in; }
+
+#lightbox { max-width: 94vw; max-height: 94vh; padding: 0; border: 0; border-radius: 8px; background: var(--panel); cursor: zoom-out; }
+#lightbox::backdrop { background: rgb(0 0 0 / .7); }
+#lightbox img { display: block; max-width: 94vw; max-height: calc(94vh - 40px); }
+#lightbox .caption { margin: 0; padding: 8px 12px; font-size: 13px; }
+
+#settings, #about { width: min(480px, calc(100vw - 32px)); padding: 20px; color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 10px; }
+#settings::backdrop, #about::backdrop { background: rgb(0 0 0 / .5); }
+#settings h2, #about h2 { margin-bottom: 4px; }
+#about p, #about ol { margin: 8px 0 12px; font-size: 13px; }
+#about ol { padding-left: 18px; }
+#about li { margin-bottom: 6px; }
+#about li:last-child { margin-bottom: 0; }
+#about code { padding: 1px 4px; border-radius: 4px; background: var(--hover); }
+#about .actions { display: flex; justify-content: flex-end; }
+#settings .intro { margin: 0 0 12px; font-size: 13px; color: var(--muted); }
+#settings .field { display: grid; gap: 4px; margin-bottom: 12px; color: var(--text); cursor: default; }
+#settings .field-label { display: flex; align-items: center; gap: 2px; }
+#settings .field-label label { color: inherit; font-size: inherit; cursor: default; }
+#settings .info { position: relative; display: inline-flex; }
+#settings .info button.icon { margin: -5px 0; }
+#settings .info button.icon:hover { background: none; }
+#settings .info .tip {
+  position: absolute; left: 50%; top: calc(100% + 4px); transform: translateX(-50%); z-index: 1; width: max-content; max-width: 260px;
+  padding: 6px 8px; font-size: 12px; color: var(--text); background: var(--bg); border: 1px solid var(--border); border-radius: 6px; box-shadow: 0 4px 12px rgb(0 0 0 / .15);
+  visibility: hidden; opacity: 0; transition: opacity .1s;
+}
+#settings .info:hover .tip, #settings .info:has(:focus-visible) .tip { visibility: visible; opacity: 1; }
+#settings input { padding: 6px 8px; font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--border); border-radius: 6px; }
+#settings input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+#settings fieldset { margin: 4px 0 12px; padding: 8px 12px 0; border: 1px solid var(--border); border-radius: 8px; }
+#settings legend { padding: 0 4px; font-size: 13px; color: var(--muted); }
+#settings .error-text { margin: 0 0 12px; padding: 6px 8px; white-space: pre-wrap; border-radius: 4px; color: var(--failed); background: var(--hover); }
+#settings .actions { display: flex; justify-content: flex-end; gap: 8px; }
+
+#toast {
+  position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); max-width: 600px;
+  padding: 10px 16px; border-radius: 8px; color: #fff; background: #b91c1c; box-shadow: 0 4px 16px rgb(0 0 0 / .25); white-space: pre-wrap;
+}
+
+/* Narrow windows: the run panel moves below the editor. */
+@media (max-width: 1000px) {
+  body { height: auto; --sidebar: 180px; grid-template-columns: var(--sidebar) minmax(0, 1fr); }
+  #sidebar, #editor-pane { height: 100vh; }
+  #run-pane { grid-column: 1 / -1; border-top: 1px solid var(--border); }
+  .run-header { position: static; }
+}
